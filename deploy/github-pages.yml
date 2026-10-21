@@ -1,0 +1,33 @@
+# Template GitHub Actions workflow: build and publish to GitHub Pages.
+# Copy to .github/workflows/pages.yml. GitHub Pages cannot send HTTP headers, so the policy is
+# enforced by the <meta> Content-Security-Policy in index.html (same directives, minus frame-ancestors).
+# A project site lives under /<repo>/, so the base href must be set below.
+name: Publish AuraSOS
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - run: flutter pub get
+      - run: flutter analyze && flutter test
+      - run: tool/build_web.sh --base-href "/${{ github.event.repository.name }}/"
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/web
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+    steps:
+      - uses: actions/deploy-pages@v4

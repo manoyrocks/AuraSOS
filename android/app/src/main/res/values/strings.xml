@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AuraSOS</string>
+
+    <!-- Long-press menu on the app icon. Keep identical to web/manifest.json and the iOS quick actions
+         (test/native_shell_test.dart checks they agree). -->
+    <string name="shortcut_sos_short">SOS</string>
+    <string name="shortcut_sos_long">SOS: calm down</string>
+    <string name="shortcut_focus_short">Focus</string>
+    <string name="shortcut_focus_long">Focus</string>
+    <string name="shortcut_calm_short">Calm</string>
+    <string name="shortcut_calm_long">Play &amp; calm</string>
+    <string name="shortcut_deep_short">Deep</string>
+    <string name="shortcut_deep_long">Deep calm</string>
+</resources>

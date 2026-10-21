@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Shown while the process starts: dark, matching the app, instead of the default white. -->
+    <style name="LaunchTheme" parent="@android:style/Theme.Black.NoTitleBar">
+        <item name="android:windowBackground">@drawable/launch_background</item>
+        <item name="android:colorBackground">@color/aura_background</item>
+    </style>
+    <!-- Applied once the process has started; also the window colour behind the Flutter UI. -->
+    <style name="NormalTheme" parent="@android:style/Theme.Black.NoTitleBar">
+        <item name="android:windowBackground">@color/aura_background</item>
+        <item name="android:colorBackground">@color/aura_background</item>
+    </style>
+</resources>

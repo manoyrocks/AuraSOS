@@ -1,0 +1,5 @@
+# AuraSOS PWA on Netlify. Deploy the already-built folder (Netlify does not need Flutter):
+#   netlify deploy --prod --dir=build/web
+# build/web/_headers already carries the security headers; this file only sets the publish dir.
+[build]
+  publish = "build/web"

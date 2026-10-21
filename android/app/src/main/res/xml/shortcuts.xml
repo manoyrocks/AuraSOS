@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="sos"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_sos"
+        android:shortcutShortLabel="@string/shortcut_sos_short"
+        android:shortcutLongLabel="@string/shortcut_sos_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.aurasync.aurasync"
+            android:targetClass="com.aurasync.aurasync.MainActivity">
+            <extra android:name="aurasync.mode" android:value="sos" />
+        </intent>
+    </shortcut>
+    <shortcut
+        android:shortcutId="focus"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_focus"
+        android:shortcutShortLabel="@string/shortcut_focus_short"
+        android:shortcutLongLabel="@string/shortcut_focus_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.aurasync.aurasync"
+            android:targetClass="com.aurasync.aurasync.MainActivity">
+            <extra android:name="aurasync.mode" android:value="focus" />
+        </intent>
+    </shortcut>
+    <shortcut
+        android:shortcutId="calm"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_calm"
+        android:shortcutShortLabel="@string/shortcut_calm_short"
+        android:shortcutLongLabel="@string/shortcut_calm_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.aurasync.aurasync"
+            android:targetClass="com.aurasync.aurasync.MainActivity">
+            <extra android:name="aurasync.mode" android:value="calm" />
+        </intent>
+    </shortcut>
+    <shortcut
+        android:shortcutId="deep"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_deep"
+        android:shortcutShortLabel="@string/shortcut_deep_short"
+        android:shortcutLongLabel="@string/shortcut_deep_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.aurasync.aurasync"
+            android:targetClass="com.aurasync.aurasync.MainActivity">
+            <extra android:name="aurasync.mode" android:value="deep" />
+        </intent>
+    </shortcut>
+</shortcuts>

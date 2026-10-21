@@ -1,0 +1,106 @@
+{
+    "name": "AuraSOS",
+    "short_name": "AuraSOS",
+    "description": "Offline calming sounds and visuals for children with autism. No ads, no accounts, nothing leaves the device.",
+    "id": "/",
+    "start_url": ".",
+    "scope": ".",
+    "display": "standalone",
+    "display_override": [
+        "fullscreen",
+        "standalone"
+    ],
+    "orientation": "any",
+    "background_color": "#0B1220",
+    "theme_color": "#0B1220",
+    "lang": "en",
+    "categories": [
+        "health",
+        "lifestyle",
+        "education"
+    ],
+    "prefer_related_applications": false,
+    "icons": [
+        {
+            "src": "icons/Icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "icons/Icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "icons/Icon-maskable-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "icons/Icon-maskable-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "SOS: calm down",
+            "short_name": "SOS",
+            "description": "Start the calming SOS session now",
+            "url": "./?mode=sos",
+            "icons": [
+                {
+                    "src": "icons/Icon-192.png",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                }
+            ]
+        },
+        {
+            "name": "Focus",
+            "short_name": "Focus",
+            "description": "Start a focus session with the visual timer",
+            "url": "./?mode=focus",
+            "icons": [
+                {
+                    "src": "icons/Icon-192.png",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                }
+            ]
+        },
+        {
+            "name": "Play & calm",
+            "short_name": "Calm",
+            "description": "Start a calm session with touch play",
+            "url": "./?mode=calm",
+            "icons": [
+                {
+                    "src": "icons/Icon-192.png",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                }
+            ]
+        },
+        {
+            "name": "Deep calm",
+            "short_name": "Deep",
+            "description": "Start the deep calm anchor",
+            "url": "./?mode=deep",
+            "icons": [
+                {
+                    "src": "icons/Icon-192.png",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                }
+            ]
+        }
+    ],
+    "launch_handler": {
+        "client_mode": "navigate-existing"
+    }
+}

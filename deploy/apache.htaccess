@@ -1,0 +1,13 @@
+# AuraSOS PWA - Apache (.htaccess in the web root). Needs mod_headers and mod_mime.
+AddType application/wasm .wasm
+Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; worker-src 'self' blob:; manifest-src 'self'; media-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'; frame-ancestors 'none'"
+Header always set X-Content-Type-Options "nosniff"
+Header always set X-Frame-Options "DENY"
+Header always set Referrer-Policy "no-referrer"
+Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()"
+Header always set Cross-Origin-Opener-Policy "same-origin"
+Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+Header set Cache-Control "no-cache"
+<FilesMatch "\.(png)$">
+  Header set Cache-Control "public, max-age=604800"
+</FilesMatch>
