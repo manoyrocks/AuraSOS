@@ -31,11 +31,24 @@ HTTPS is **required**: browsers enable the service worker (offline, install) onl
 | **Cloudflare Pages** | Upload `build/web` (Wrangler or dashboard). `_headers` is picked up automatically |
 | **Firebase Hosting** | Copy `deploy/firebase.json` to the project root, then `firebase deploy --only hosting` |
 | **Vercel** | Copy `deploy/vercel.json` into `build/web`, then `vercel deploy --prod build/web` |
-| **GitHub Pages** | Copy `deploy/github-pages.yml` to `.github/workflows/pages.yml`. Pages cannot send headers, so the policy is enforced by the `<meta>` CSP in `index.html` (same rules, minus `frame-ancestors`). Project sites need `--base-href` (the workflow sets it) |
+| **GitHub Pages** | **Set up for this repository** (see A2a). Pages cannot send headers, so the policy is enforced by the `<meta>` CSP in `index.html` (same rules, minus `frame-ancestors`). Project sites need `--base-href` (the workflow sets it) |
 | **nginx / Apache** | `deploy/nginx.conf` or `deploy/apache.htaccess`. nginx must serve `.wasm` as `application/wasm` |
 
 Every config carries the same headers, generated from `web/_headers`; `test/publish_readiness_test.dart` fails if one drifts.
 Test locally with the production headers: `python3 tool/serve_web.py`.
+
+#### A2a. GitHub Pages for this repository
+The workflow `.github/workflows/pages.yml` (a copy of `deploy/github-pages.yml`; a test keeps them identical) runs on every push to `main` and on
+demand: `flutter analyze`, `flutter test`, then `tool/build_web.sh --base-href /AuraSOS/` (which fails on any publishability problem), then
+publishes `build/web`. A failing test or check stops the deploy, so the live site is always a build that passed.
+
+**One-time setup:** repository **Settings → Pages → Build and deployment → Source: GitHub Actions**. After that, every push deploys.
+The site is served at **https://manoyrocks.github.io/AuraSOS/**. Pages is HTTPS, so installing the app and offline use work.
+
+Pushing the workflow file itself needs a token with the **`workflow`** scope (classic tokens) or the *Workflows: read and write* permission
+(fine-grained tokens); a token with only `repo` is refused.
+
+To redeploy without a code change, run the workflow from the **Actions** tab (*Run workflow*). To roll back, revert the commit on `main`.
 
 ### A3. Verify the live site
 ```bash

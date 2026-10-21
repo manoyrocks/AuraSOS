@@ -107,10 +107,21 @@ void main() {
           contains('application/wasm'));
     });
 
-    test('the GitHub Pages template sets a base href for project sites', () {
+    test(
+        'the GitHub Pages workflow sets a base href, gates on tests, and matches its template',
+        () {
       final y = File('deploy/github-pages.yml').readAsStringSync();
       expect(y, contains('--base-href'));
       expect(y, contains('flutter test'));
+      expect(y, contains('flutter analyze'));
+      expect(y, contains('tool/build_web.sh'));
+      expect(y, contains('actions/deploy-pages'));
+      expect(y, contains('flutter-version: 3.47.7'),
+          reason: 'pin the Flutter version for reproducible builds');
+      final live = File('.github/workflows/pages.yml');
+      expect(live.existsSync(), isTrue);
+      expect(live.readAsStringSync(), y,
+          reason: 'deploy/github-pages.yml and the live workflow drifted');
     });
   });
 

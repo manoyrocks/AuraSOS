@@ -26,6 +26,9 @@ C++ audio engine.
 - **Reports for therapists.** Copy or save a CSV and Markdown summary for a BCBA / OT.
 - **Same icon and long-press menu everywhere:** SOS, Focus, Play & calm, Deep calm.
 
+**Web app:** https://manoyrocks.github.io/AuraSOS/ (GitHub Pages, deployed by the workflow in `.github/workflows/pages.yml`; see
+[docs/PUBLISHING.md](docs/PUBLISHING.md)).
+
 ## Documentation
 | Document | For | What is in it |
 |---|---|---|

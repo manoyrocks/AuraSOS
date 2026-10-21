@@ -1,0 +1,62 @@
+# Builds AuraSOS and publishes it to GitHub Pages on every push to main.
+# Live at https://<user>.github.io/<repo>/  (this repo: https://manoyrocks.github.io/AuraSOS/)
+#
+# One-time setup: repository Settings -> Pages -> Build and deployment -> Source: "GitHub Actions".
+# GitHub Pages cannot send HTTP headers, so the policy is enforced by the <meta> Content-Security-Policy
+# in index.html (same directives as web/_headers, minus frame-ancestors).
+# A project site lives under /<repo>/, so the base href is set below.
+# The copy that runs is .github/workflows/pages.yml; keep the two identical (test/publish_readiness_test.dart checks).
+name: Deploy AuraSOS to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.47.7
+          channel: stable
+          cache: true
+
+      # sqflite_common_ffi (used by the data tests) loads the system SQLite library.
+      - name: Install SQLite
+        run: sudo apt-get update && sudo apt-get install -y libsqlite3-dev
+
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+
+      # Builds with the bundled renderer (no CDN), stamps the offline service worker, and fails on any
+      # publishability problem (see tool/check_web_build.py).
+      - name: Build the PWA for the project-site path
+        run: tool/build_web.sh --base-href "/${{ github.event.repository.name }}/"
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/web
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
