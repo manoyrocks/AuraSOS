@@ -91,7 +91,7 @@ through the same master filter, fade, compressor and limiter as everything else.
 |---|---|---|
 | `NativeDsp` | iOS, Android, desktop | FFI to the C++ library; the library also opens the speaker (`aura_audio_open`). The only file importing `dart:ffi` is `native_dsp.dart` |
 | `PureDartDsp` | Tests, fallback | A faithful port of the C++ engine; deterministic and headless; the reference for most tests |
-| `WebAudioEngine` | Browser | Wraps `PureDartDsp` and renders it into a `ScriptProcessorNode`. Created after the first user gesture (browser autoplay rules) |
+| `WebAudioEngine` | Browser | Runs the separately compiled `PureDartDsp` inside an `AudioWorkletNode`, off the UI thread. Created after the first user gesture; commands queue in order while the module loads. `playback: false` supports synchronous headless renders |
 
 `DspBridge.create()` picks the backend through conditional imports (`engine_factory*.dart`). **The C++ and Dart engines must
 be changed together** (see DEVELOPMENT.md); `test/dsp_safety_test.dart`, `voice_weave_test.dart` and `native/test/dsp_test.cpp`

@@ -65,10 +65,12 @@ Impeller-compatible GLSL: `#version 460 core`, `#include <flutter/runtime_effect
   rows between tests).
 - **Unverified here:** all Android native code, and any physical-device behaviour. See `docs/TESTING.md` (manual checklist and known gaps).
 - **Web (PWA) build:** `dart:ffi` and `dart:io` code is behind conditional imports (`engine_factory.dart`, `app_database.dart`);
-  `native_dsp.dart` is the only FFI file. In the browser `WebAudioEngine` wraps `PureDartDsp` and `JsonDatabase` replaces SQLite
+  `native_dsp.dart` is the only FFI file. In the browser `WebAudioEngine` runs `PureDartDsp` in an AudioWorklet and `JsonDatabase` replaces SQLite
   (it supports only what the repository calls and throws on anything else). Build with `tool/build_web.sh` (bundled CanvasKit
   and fonts, no CDN). Flutter's own service worker is deprecated, so `web/aura_sw.js` provides offline caching; it is stamped
   with a content-hash version at build time and must never call `skipWaiting`.
+  `lib/core/audio/dsp_worklet.dart` is compiled separately by `tool/build_web.sh`; its imports must stay Flutter-free.
+  The worklet and compiled DSP are precached, and the build runs `tool/test_audio_worklet.mjs` against the compiled engine.
 - **Publishing:** `docs/PUBLISHING.md`. The CSP is defined once in `web/_headers`; `index.html` carries the same policy in a `<meta>`
   and `deploy/*` repeat it (all checked by `test/publish_readiness_test.dart`). Keep `index.html` free of inline scripts/styles (put
   them in `web/pwa_init.js` / `web/splash.css`). `tool/build_web.sh` must pass `tool/check_web_build.py` before anything is published.
@@ -77,4 +79,3 @@ Impeller-compatible GLSL: `#version 460 core`, `#include <flutter/runtime_effect
   hand-edit generated PNGs. A new menu entry must be added to `web/manifest.json`, `res/xml/shortcuts.xml` (+ `strings.xml`, a vector
   icon), `Info.plist`, `LaunchMode`/`launchModeFrom`, and the home screen switch together (`test/native_shell_test.dart` enforces it).
   Shortcuts start sessions only from the home screen; they must never interrupt a running session.
-

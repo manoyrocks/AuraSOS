@@ -45,6 +45,9 @@ Run all of the above before a release. For a quick loop use `flutter analyze` an
 - `tool/check_web_build.py`: required files, a stamped service worker whose every precached file exists, manifest icons and shortcuts,
   no inline scripts, CSP equals `_headers`, no external URL in shipped text files, the version compiled in.
 - The shader compiler runs at build time; a bad shader fails `flutter build`.
+- `tool/test_audio_worklet.mjs`: runs the compiled Dart DSP and real worklet processor without browser UI globals;
+  checks every preset, rapid touches, sample steps < 0.005, the -3 dBFS ceiling, stop fades, voice commands and disposal.
+  `tool/build_web.sh` runs it automatically (Node.js required).
 
 ## 4. Manual checks (what machines cannot judge)
 Do these on a **physical phone and tablet**, volume low, before giving the app to a child.
@@ -55,6 +58,7 @@ Do these on a **physical phone and tablet**, volume low, before giving the app t
 3. Spam-tap the canvas: no harshness or clipping. (Very fast tapping is smoothed by design.)
 4. Check the maximum volume cap at a low and a high setting.
 5. iPhone: silent switch on mutes web audio but not the native app.
+   Web: tap and drag repeatedly with each animation active; playback should remain continuous. Repeat offline after installation.
 
 **Kiosk and screen**
 6. The back gesture and swipes do nothing during a session; unlocking needs both top corners for 3 seconds.
@@ -78,7 +82,7 @@ Do these on a **physical phone and tablet**, volume low, before giving the app t
 - **Android has never been compiled or run** (no SDK on the original machine): speaker output (AAudio + CMake), keep-awake, microphone
   capture, the shortcut menu and the adaptive icon are reviewed by hand and XML-validated only. Build and run checks 1 to 13 on Android first.
 - No physical-device or release-build testing yet on iOS or Android.
-- Web audio runs on the main thread; heavy animations on an old phone may drop frames (the C++ engine on phones does not).
+- Web audio runs in an AudioWorklet; physical-device listening under heavy animation and touch load still needs checking.
 - No automated test can judge whether sound and visuals are actually *calming*; that needs real children, caregivers and clinicians.
 
 ## 6. Suggested CI

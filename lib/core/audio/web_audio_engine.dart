@@ -1,127 +1,237 @@
+import 'dart:async';
 import 'dart:js_interop';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:web/web.dart' as web;
 
 import '../models/sensory_state.dart';
 import 'audio_engine.dart';
-import 'dsp_bridge.dart';
+import 'pure_dart_dsp.dart';
 import 'voice_weave.dart';
 
-/// Browser audio: the pure-Dart engine rendered on the main thread into a Web Audio
-/// `ScriptProcessorNode`. Fine for testing the PWA on phones and tablets; a production web
-/// build would move [PureDartDsp] into an AudioWorklet.
-///
-/// Browsers only allow audio after a user gesture, so the context is created and resumed by
-/// the first pointer / key event on the page (and again by [start], harmlessly).
+/// Browser playback runs the shared DSP on the audio thread, not Flutter's UI
+/// thread. Use `playback: false` for synchronous, deterministic headless renders.
 class WebAudioEngine implements AudioEngine, VoiceWeaveEngine {
-  WebAudioEngine() : _core = PureDartDsp() {
-    for (final String type in _gestureEvents) {
-      web.document.addEventListener(type, _onGesture);
-    }
-  }
-
-  static const List<String> _gestureEvents = <String>['pointerdown', 'touchend', 'keydown', 'click'];
-
-  /// 4096 frames = 85 ms; large enough to ride out main-thread jank, small enough for taps.
-  static const int _bufferFrames = 4096;
-
-  final PureDartDsp _core;
-  final Float32List _interleaved = Float32List(_bufferFrames * 2);
-  final Float32List _left = Float32List(_bufferFrames);
-  final Float32List _right = Float32List(_bufferFrames);
-
-  web.AudioContext? _context;
-  web.ScriptProcessorNode? _node;
-  late final JSFunction _onGesture = ((web.Event _) => _ensureRunning()).toJS;
-  bool _disposed = false;
-
-  /// True once the browser has let the audio graph run.
-  bool get isRunning => _context?.state == 'running';
-
-  /// Sample rate the browser actually granted (48 000 is requested).
-  int? get contextSampleRate => _context?.sampleRate.round();
-
-  void _ensureRunning() {
-    if (_disposed) return;
-    var ctx = _context;
-    if (ctx == null) {
-      ctx = web.AudioContext(web.AudioContextOptions(
-        sampleRate: AudioEngine.sampleRate,
-        latencyHint: 'playback'.toJS,
-      ));
-      final node = ctx.createScriptProcessor(_bufferFrames, 0, 2);
-      node.onaudioprocess = ((web.AudioProcessingEvent e) => _fill(e)).toJS;
-      node.connect(ctx.destination);
-      _context = ctx;
-      _node = node;
-    }
-    if (ctx.state != 'running') {
-      ctx.resume();
-    } else {
-      for (final String type in _gestureEvents) {
-        web.document.removeEventListener(type, _onGesture);
+  WebAudioEngine({bool playback = true})
+      : _offlineCore = playback ? null : PureDartDsp() {
+    if (playback) {
+      for (final type in _gestureEvents) {
+        web.document.addEventListener(type, _onGesture);
       }
     }
   }
 
-  void _fill(web.AudioProcessingEvent e) {
-    final buffer = e.outputBuffer;
-    final frames = buffer.length < _bufferFrames ? buffer.length : _bufferFrames;
-    _core.render(_interleaved, frames);
-    for (var i = 0; i < frames; i++) {
-      _left[i] = _interleaved[2 * i];
-      _right[i] = _interleaved[2 * i + 1];
+  static const List<String> _gestureEvents = [
+    'pointerdown', 'touchend', 'keydown', 'click',
+  ];
+
+  final PureDartDsp? _offlineCore;
+  final List<JSArray<JSAny?>> _pending = [];
+  web.AudioContext? _context;
+  web.AudioWorkletNode? _node;
+  Future<void>? _initializing;
+  Object? _failure;
+  bool _disposed = false;
+  late final JSFunction _onGesture = ((web.Event _) => _ensureRunning()).toJS;
+
+  bool get isRunning =>
+      _node != null && _failure == null && _context?.state == 'running';
+
+  int? get contextSampleRate => _context?.sampleRate.round();
+
+  void _removeGestures() {
+    for (final type in _gestureEvents) {
+      web.document.removeEventListener(type, _onGesture);
     }
-    buffer.copyToChannel(_left.toJS, 0);
-    buffer.copyToChannel(_right.toJS, 1);
+  }
+
+  void _reportFailure(Object error, StackTrace stack) {
+    _failure = error;
+    _pending.clear();
+    _node?.disconnect();
+    _removeGestures();
+    FlutterError.reportError(FlutterErrorDetails(
+      exception: error,
+      stack: stack,
+      library: 'AuraSOS web audio',
+      context: ErrorDescription('while starting or processing audio playback'),
+    ));
+  }
+
+  void _ensureRunning() {
+    if (_disposed || _offlineCore != null || _failure != null) return;
+    try {
+      final ctx = _context ??= web.AudioContext(web.AudioContextOptions(
+        sampleRate: AudioEngine.sampleRate,
+        latencyHint: 'playback'.toJS,
+      ));
+      if (ctx.sampleRate != AudioEngine.sampleRate) {
+        throw StateError('AuraSOS audio requires a 48000 Hz context');
+      }
+      // Resume synchronously within the gesture, before waiting for the module.
+      if (ctx.state != 'running') {
+        unawaited(ctx.resume().toDart.then((_) {
+          if (!_disposed && ctx.state == 'running') _removeGestures();
+        }, onError: (Object error, StackTrace stack) {
+          _reportFailure(error, stack);
+        }));
+      }
+      _initializing ??= _initialize(ctx);
+    } catch (error, stack) {
+      _reportFailure(error, stack);
+    }
+  }
+
+  Future<void> _initialize(web.AudioContext ctx) async {
+    try {
+      await ctx.audioWorklet.addModule(
+        web.URL('audio_worklet.js', web.document.baseURI).href,
+      ).toDart;
+      if (_disposed || _failure != null) return;
+      final node = web.AudioWorkletNode(ctx, 'aura-dsp',
+          web.AudioWorkletNodeOptions(
+            numberOfInputs: 0,
+            numberOfOutputs: 1,
+            outputChannelCount: [2.toJS].toJS,
+          ));
+      node.onprocessorerror = ((web.Event _) {
+        _reportFailure(
+            StateError('AuraSOS audio processor failed'), StackTrace.current);
+      }).toJS;
+      _node = node;
+      for (final command in _pending) {
+        node.port.postMessage(command);
+      }
+      _pending.clear();
+      node.connect(ctx.destination);
+    } catch (error, stack) {
+      _reportFailure(error, stack);
+    }
+  }
+
+  void _send(String command, [List<JSAny?> args = const []]) {
+    if (_disposed) return;
+    if (_failure != null) {
+      throw StateError('AuraSOS audio is unavailable: $_failure');
+    }
+    final message = <JSAny?>[command.toJS, ...args].toJS;
+    final node = _node;
+    if (node == null) {
+      _pending.add(message);
+    } else {
+      node.port.postMessage(message);
+    }
   }
 
   @override
   void start(SessionPreset preset) {
-    _ensureRunning();
-    _core.start(preset);
+    if (_offlineCore case final core?) {
+      core.start(preset);
+    } else {
+      _ensureRunning();
+      _send('start', [preset.index.toJS]);
+    }
   }
 
   @override
-  void stop() => _core.stop();
+  void stop() {
+    if (_offlineCore case final core?) {
+      core.stop();
+    } else {
+      _send('stop');
+    }
+  }
 
   @override
-  void switchPreset(SessionPreset preset) => _core.switchPreset(preset);
+  void switchPreset(SessionPreset preset) {
+    if (_offlineCore case final core?) {
+      core.switchPreset(preset);
+    } else {
+      _send('switchPreset', [preset.index.toJS]);
+    }
+  }
 
   @override
-  void applyIso(IsoSnapshot snapshot) => _core.applyIso(snapshot);
+  void applyIso(IsoSnapshot s) {
+    if (_offlineCore case final core?) {
+      core.applyIso(s);
+    } else {
+      _send('applyIso', [
+        s.bpm.toJS, s.lpfHz.toJS, s.rhythmWeight.toJS, s.padWeight.toJS,
+        s.brownNoiseGain.toJS, s.heartbeatGain.toJS,
+      ]);
+    }
+  }
 
   @override
-  void setProfileLimits({double highCutHz = 0, double masterCap = 1.0, bool allowWater = true}) =>
-      _core.setProfileLimits(highCutHz: highCutHz, masterCap: masterCap, allowWater: allowWater);
+  void setProfileLimits(
+      {double highCutHz = 0, double masterCap = 1, bool allowWater = true}) {
+    if (_offlineCore case final core?) {
+      core.setProfileLimits(
+          highCutHz: highCutHz, masterCap: masterCap, allowWater: allowWater);
+    } else {
+      _send('setProfileLimits',
+          [highCutHz.toJS, masterCap.toJS, allowWater.toJS]);
+    }
+  }
 
   @override
-  void triggerNote(int degree, double velocity) => _core.triggerNote(degree, velocity);
+  void triggerNote(int degree, double velocity) {
+    if (_offlineCore case final core?) {
+      core.triggerNote(degree, velocity);
+    } else {
+      _send('triggerNote', [degree.toJS, velocity.toJS]);
+    }
+  }
 
   @override
-  void render(Float32List out, int frames) => _core.render(out, frames);
+  void render(Float32List out, int frames) {
+    final core = _offlineCore;
+    if (core == null) {
+      throw StateError('Use WebAudioEngine(playback: false) to render offline');
+    }
+    core.render(out, frames);
+  }
 
   @override
-  void loadVoice(int slot, Float32List mono48k) => _core.loadVoice(slot, mono48k);
+  void loadVoice(int slot, Float32List mono48k) {
+    if (_offlineCore case final core?) {
+      core.loadVoice(slot, mono48k);
+    } else {
+      _send('loadVoice', [slot.toJS, mono48k.toJS]);
+    }
+  }
 
   @override
-  void clearVoice(int slot) => _core.clearVoice(slot);
+  void clearVoice(int slot) {
+    if (_offlineCore case final core?) {
+      core.clearVoice(slot);
+    } else {
+      _send('clearVoice', [slot.toJS]);
+    }
+  }
 
   @override
-  void setVoiceWeave({required bool enabled, double gain = 0.12, double intervalSec = 45}) =>
-      _core.setVoiceWeave(enabled: enabled, gain: gain, intervalSec: intervalSec);
+  void setVoiceWeave(
+      {required bool enabled, double gain = 0.12, double intervalSec = 45}) {
+    if (_offlineCore case final core?) {
+      core.setVoiceWeave(
+          enabled: enabled, gain: gain, intervalSec: intervalSec);
+    } else {
+      _send('setVoiceWeave', [enabled.toJS, gain.toJS, intervalSec.toJS]);
+    }
+  }
 
   @override
   void dispose() {
     if (_disposed) return;
+    if (_node != null) _send('dispose');
     _disposed = true;
-    for (final String type in _gestureEvents) {
-      web.document.removeEventListener(type, _onGesture);
-    }
+    _removeGestures();
+    _pending.clear();
     _node?.disconnect();
-    _node?.onaudioprocess = null;
-    _context?.close();
-    _core.dispose();
+    if (_context case final ctx?) unawaited(ctx.close().toDart);
+    _offlineCore?.dispose();
   }
 }

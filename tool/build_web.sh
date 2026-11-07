@@ -15,6 +15,9 @@ echo "Building AuraSOS $APP_VERSION for the web"
 flutter build web --release --no-web-resources-cdn --no-wasm-dry-run \
   --dart-define=APP_VERSION="$APP_VERSION" "$@"
 
+dart compile js -O2 lib/core/audio/dsp_worklet.dart -o build/web/dsp_worklet.dart.js
+node tool/test_audio_worklet.mjs build/web
+
 python3 - <<'PY'
 import hashlib, json, os
 
