@@ -7,6 +7,7 @@
 | Xcode + command-line tools | iOS builds, the C++ harness (`clang++`), icon resizing (`sips`) | `xcode-select --install` |
 | Android SDK + NDK, JDK 17 | Android builds | Not available on the original dev machine, so Android code is unverified (see TESTING.md) |
 | Python 3 | `tool/*.py`, `tool/serve_web.py` | Standard library only |
+| Node.js (18 or later) | Web build's compiled AudioWorklet checks | `tool/test_audio_worklet.mjs` |
 
 First run: `flutter pub get`, then `flutter analyze && flutter test`.
 
@@ -62,7 +63,8 @@ It must change in **all** of: `web/manifest.json` (`shortcuts`), `android/…/re
 
 ### Change the audio engine
 Change **both** implementations and keep them identical: `native/dsp_engine.{h,cpp}` and `PureDartDsp` in
-`lib/core/audio/dsp_bridge.dart`. Then run `native/build_and_test.sh` and `flutter test test/dsp_safety_test.dart test/voice_weave_test.dart`.
+`lib/core/audio/pure_dart_dsp.dart` (re-exported by `dsp_bridge.dart`). Then run `native/build_and_test.sh`,
+`flutter test test/dsp_safety_test.dart test/voice_weave_test.dart` and `tool/build_web.sh` (also exercises the compiled AudioWorklet).
 New control calls go through the lock-free queue; if the C API changes, update `native/audio_output_keep.cpp` (keeps symbols alive
 in iOS release builds), `NativeDsp` and, if user-facing, the `AudioEngine` contract and `_NullAudio`-style test doubles.
 

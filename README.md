@@ -87,7 +87,7 @@ existing installs and saved data are unaffected.
 ## Known limitations
 - Android code (speaker output, keep-awake, microphone, shortcuts) has not been compiled or run.
 - Not yet exercised on physical iOS or Android devices, or in a release build.
-- The web build renders audio on the main thread; an audio worklet would be better for production.
+- Web playback requires AudioWorklet support (current Safari, Chrome and Firefox) and HTTPS or localhost.
 - Under extremely fast tapping (50+ per second) the output limiter smooths the kalimba. It is safe, not crisp.
 - Android background audio would need a foreground service (iOS is configured).
 

@@ -29,7 +29,7 @@ def exists(rel):
 for required in ("index.html", "manifest.json", "aura_sw.js", "flutter_bootstrap.js", "main.dart.js",
                  "pwa_init.js", "splash.css", "privacy.html", "robots.txt", "_headers",
                  "canvaskit/canvaskit.wasm", "canvaskit/chromium/canvaskit.wasm", "favicon.png",
-                 "favicon.ico"):
+                 "favicon.ico", "audio_worklet.js", "dsp_worklet.dart.js"):
     if not exists(required):
         fail(f"missing required file: {required}")
 
@@ -47,7 +47,8 @@ else:
         if not exists(rel):
             fail(f"service worker precaches a file that does not exist: {f}")
     for must in ("./", "main.dart.js", "flutter_bootstrap.js", "manifest.json", "privacy.html",
-                 "assets/AssetManifest.bin.json", "canvaskit/canvaskit.wasm"):
+                 "assets/AssetManifest.bin.json", "canvaskit/canvaskit.wasm",
+                 "audio_worklet.js", "dsp_worklet.dart.js"):
         if must not in files:
             fail(f"service worker does not precache {must}")
     print(f"  service worker precaches {len(files)} files")

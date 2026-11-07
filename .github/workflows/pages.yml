@@ -11,6 +11,8 @@ name: Deploy AuraSOS to GitHub Pages
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -52,6 +54,7 @@ jobs:
           path: build/web
 
   deploy:
+    if: github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
     environment:

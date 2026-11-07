@@ -2,6 +2,11 @@
 
 Format: newest first. Versions follow `pubspec.yaml`. Keep entries in plain language.
 
+## Unreleased
+- Move web sound generation off the screen-rendering thread into an AudioWorklet so taps and animations cannot
+  starve the audio callback. Keep the existing DSP, touch notes, four-second fades and acoustic limits.
+- Precache the audio modules for offline use and check the compiled worklet during web builds.
+
 ## 1.0.0 (2026-10-22): first release
 The first complete version of **AuraSOS** (originally built under the working name AuraSync).
 
