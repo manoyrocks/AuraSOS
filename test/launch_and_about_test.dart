@@ -92,7 +92,7 @@ void main() {
         home: Scaffold(body: SingleChildScrollView(child: AboutSection())),
       ));
       expect(find.textContaining('AuraSOS '), findsOneWidget);
-      expect(find.textContaining('1.0.0'), findsOneWidget);
+      expect(find.textContaining('1.0.1'), findsOneWidget);
       expect(find.text('Privacy'), findsOneWidget);
       expect(find.textContaining('nothing anywhere'), findsNothing);
       await tester.tap(find.text('Privacy'));

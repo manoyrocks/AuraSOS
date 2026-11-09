@@ -2,7 +2,7 @@
 
 Format: newest first. Versions follow `pubspec.yaml`. Keep entries in plain language.
 
-## Unreleased
+## 1.0.1 (2026-11-09)
 - **Sound is 30% louder.** A fixed make-up gain of 1.3 sits after the volume cap and before the compressor, so it applies at every volume setting. The −3 dBFS ceiling, compressor and click-free guard are unchanged.
 - **Android 7 and newer.** Speaker output moved from AAudio (API 26+) to OpenSL ES, so the app now installs on Android 7.0 (API 24) and up.
 - **Android icon set completed.** Added round launcher icons (`ic_launcher_round`, all densities plus the adaptive-round XML) with `android:roundIcon` in the manifest, and the 512 × 512 Google Play listing icon at `android/store/ic_launcher_512.png`. All are produced by `tool/generate_icons.py`.

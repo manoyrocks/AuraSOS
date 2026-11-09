@@ -78,7 +78,7 @@ Build with Flutter as usual; the icon, launch screen, long-press menu, microphon
 |---|---|---|
 | Product name | **AuraSOS** | iOS `CFBundleDisplayName`, Android `strings.xml` (`app_name`) |
 | Android `applicationId` / iOS bundle id | `com.aurasync.aurasync` | Kept from the original name so installs and saved data survive the rename. **Cannot be changed after release without publishing a new app.** If the app has never shipped, change it now (`android/app/build.gradle.kts`, the Kotlin package folder and `AndroidManifest`/`MainActivity.kt`, and the iOS bundle id in Xcode) |
-| Version | `pubspec.yaml` `version:` (`1.0.0+1`) | `name+build`; the build number must rise on every store upload. Keep `lib/core/app_info.dart` in step |
+| Version | `pubspec.yaml` `version:` (`1.0.1+2`) | `name+build`; the build number must rise on every store upload. Keep `lib/core/app_info.dart` in step |
 
 ### B2. iOS (App Store)
 1. Open `ios/Runner.xcworkspace` in Xcode; set your **Team** and a unique **bundle id**; keep automatic signing.
