@@ -61,7 +61,7 @@ This builds your child's "what helps" history. Tap the small ✕ to go back to t
 | Setting | What it does |
 |---|---|
 | **Child's name** | Shown in reports |
-| **Maximum volume** | A ceiling on how loud AuraSOS can ever be (default 60%). It sits on top of your device's volume |
+| **Maximum volume** | A ceiling on how loud AuraSOS can ever be (default 80%). It sits on top of your device's volume |
 | **Maximum screen brightness** | A ceiling on screen glow (default 80%); the app also dims itself in the late calm-down stage |
 | **High-frequency cut** | Removes high sounds above a chosen pitch (800–4000 Hz) for children sensitive to treble |
 | **Water sounds** | Turns water-like textures off for children who dislike them |
@@ -122,8 +122,10 @@ analytics, and the app sends nothing anywhere. To delete everything, clear the a
 ## Troubleshooting
 | Problem | Try |
 |---|---|
-| **No sound** (iPhone / iPad) | Turn the silent switch off and raise the device volume. In the browser, tap the screen once; browsers allow sound only after a touch |
-| **Sound is too quiet** | The app's ceiling is 60% by default. Raise **Maximum volume**, and raise the device volume |
+| **No sound** (web app) | Browsers only allow sound after a touch. If you see **"Tap the screen to turn on sound"**, touch the screen once. Also check: device volume up and not muted, the **silent switch off** (iPhone), a Bluetooth speaker not connected to something else, and the tab not muted |
+| **Sound is there but I can barely hear it** | The calming sounds are deliberately **low and soft** (much of it below 500 Hz), and the first 4 seconds fade in from silence. Small phone and tablet speakers reproduce low sounds poorly: use headphones or a speaker with some bass, and raise the device volume |
+| **Sound stopped after a call or switching apps** (web) | Touch the screen once; it resumes. If the hint doesn't appear, reload the app |
+| **Sound is too quiet** | The app's ceiling is 80% by default. Raise **Maximum volume**, and raise the device volume |
 | **Can't unlock** | Hold *both* top corners together and keep holding for the full 3 seconds. Two fingers, both corners |
 | **The picture looks stuttery** (web, older device) | Pick a lighter animation (Lanterns, Breathing orb or Light tunnel), or use the phone app |
 | **A new version doesn't appear** (web) | Close every tab or the installed app and reopen it, or use **Settings → About → Reload app** |

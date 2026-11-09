@@ -34,7 +34,8 @@ Run all of the above before a release. For a quick loop use `flutter analyze` an
 | | `shader_safety_test.dart` (19) | Every shader has the shared header and uniforms, no fast oscillation, lanterns background is pure black, all registered |
 | **Offline & publishing** | `offline_invariants_test.dart` (9) | No network packages, APIs or URLs in `lib/`; dependency allow-list; no `INTERNET` permission; no external host in `web/` |
 | | `pwa_shell_test.dart` (7), `publish_readiness_test.dart` (21) | Manifest, icons, no inline scripts, strict CSP consistent across `index.html`, `_headers` and every hosting config, privacy page, favicon, version matches `pubspec.yaml` |
-| **Cross-platform shell** | `native_shell_test.dart` (22) | Icons exist at every required size on iOS and Android; the iOS icon has no alpha; the web, Android and iOS long-press menus match in modes, order and names; dark launch screens; native channel code agrees with Dart; the shortcut channel works both ways and never interrupts a running session |
+| **Cross-platform shell** | `native_shell_test.dart` (29) | Icons exist at every required size on iOS and Android (square, round and the 512 px Play icon); the Android 12+ splash animation targets real vector parts and stays within 1 s; the iOS icon has no alpha; the web, Android and iOS long-press menus match in modes, order and names; dark launch screens; native channel code agrees with Dart; the shortcut channel works both ways and never interrupts a running session |
+| **Loader** | `aura_loader_test.dart` (5) | The breathing curve (4 s in, 6 s out), the Loading label, reduced motion keeps it still, no ticker leaks |
 
 ### Reading a failure
 - A **safety test** failing means a promise was broken. Fix the code, not the threshold.
@@ -75,9 +76,10 @@ Do these on a **physical phone and tablet**, volume low, before giving the app t
 13. Change each setting, save, and confirm the next session honours it; copy a report and read it.
 
 ## 5. Known gaps
-- **Android has never been compiled or run** (no SDK on the original machine): speaker output (AAudio + CMake), keep-awake, microphone
-  capture, the shortcut menu and the adaptive icon are reviewed by hand and XML-validated only. Build and run checks 1 to 13 on Android first.
+- **Android is only lightly tested.** It builds and launches on a Galaxy Tab A (Android 7, API 24) and a Galaxy Note20 5G (Android 13); sound output (OpenSL ES) starts without errors, but audibility is judged by ear. Not yet checked on a device: keep-awake, microphone
+  capture, the shortcut menu, the adaptive/round icons and the animated splash are reviewed by hand and XML-validated only. Build and run checks 1 to 13 on Android first.
 - No physical-device or release-build testing yet on iOS or Android.
+- **Browser autoplay rules cannot be reproduced in the automated browser pane** (it lets a new audio context run with no touch). The unlock logic is verified by simulating a blocked context, by unit tests of the hint, and by source-level guards (`test/sound_gate_test.dart`); real touch devices (Android Chrome, iPhone Safari) must be tried by hand.
 - Web audio runs on the main thread; heavy animations on an old phone may drop frames (the C++ engine on phones does not).
 - No automated test can judge whether sound and visuals are actually *calming*; that needs real children, caregivers and clinicians.
 

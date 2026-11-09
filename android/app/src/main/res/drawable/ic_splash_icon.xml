@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Splash icon (288dp canvas; Android 12+ shows the central 192dp circle). The heart and ripples are
+     kept well inside that circle. Same artwork as the launcher icon. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="288dp"
+    android:height="288dp"
+    android:viewportWidth="288"
+    android:viewportHeight="288">
+    <group android:name="rings">
+        <path
+            android:name="ring_inner"
+            android:pathData="M70,148a74,74 0 1,0 148,0a74,74 0 1,0 -148,0"
+            android:strokeColor="#FFFFFF"
+            android:strokeAlpha="0.30"
+            android:strokeWidth="3" />
+        <path
+            android:name="ring_outer"
+            android:pathData="M56,148a88,88 0 1,0 176,0a88,88 0 1,0 -176,0"
+            android:strokeColor="#FFFFFF"
+            android:strokeAlpha="0.14"
+            android:strokeWidth="3" />
+    </group>
+    <group
+        android:name="heart"
+        android:pivotX="144"
+        android:pivotY="148">
+        <path android:pathData="M144,195 C90,159 81,120 108,103.5 C126,93 141,102 144,114 C147,102 162,93 180,103.5 C207,120 198,159 144,195 Z">
+            <aapt:attr name="android:fillColor">
+                <gradient
+                    android:startX="144"
+                    android:startY="93"
+                    android:endX="144"
+                    android:endY="195"
+                    android:startColor="#F4867D"
+                    android:endColor="#C94A5A"
+                    android:type="linear" />
+            </aapt:attr>
+        </path>
+    </group>
+</vector>

@@ -55,7 +55,7 @@ class SensoryProfile {
   const SensoryProfile({
     this.id = 1,
     this.childName = 'Child',
-    this.masterVolumeCap = 0.6,
+    this.masterVolumeCap = 0.8,
     this.brightnessCap = 0.8,
     this.highCutHz = 0,
     this.disableWater = false,
@@ -168,7 +168,7 @@ class SensoryProfile {
     return SensoryProfile(
       id: (m['id'] as num?)?.toInt() ?? 1,
       childName: (m['child_name'] as String?) ?? 'Child',
-      masterVolumeCap: ((m['master_volume_cap'] as num?)?.toDouble() ?? 0.6)
+      masterVolumeCap: ((m['master_volume_cap'] as num?)?.toDouble() ?? 0.8)
           .clamp(0.0, 1.0)
           .toDouble(),
       brightnessCap: ((m['brightness_cap'] as num?)?.toDouble() ?? 0.8)

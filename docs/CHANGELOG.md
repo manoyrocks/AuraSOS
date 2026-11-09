@@ -2,6 +2,14 @@
 
 Format: newest first. Versions follow `pubspec.yaml`. Keep entries in plain language.
 
+## Unreleased
+- **Sound is 30% louder.** A fixed make-up gain of 1.3 sits after the volume cap and before the compressor, so it applies at every volume setting. The −3 dBFS ceiling, compressor and click-free guard are unchanged.
+- **Android 7 and newer.** Speaker output moved from AAudio (API 26+) to OpenSL ES, so the app now installs on Android 7.0 (API 24) and up.
+- **Android icon set completed.** Added round launcher icons (`ic_launcher_round`, all densities plus the adaptive-round XML) with `android:roundIcon` in the manifest, and the 512 × 512 Google Play listing icon at `android/store/ic_launcher_512.png`. All are produced by `tool/generate_icons.py`.
+- **Loader icon.** A soft breathing heart (4 s in, 6 s out, still when the device asks for reduced motion) replaces the stock spinner in the caregiver area and Insights (`AuraLoader`), the web start-up splash, and the Android 12+ launch splash (`ic_splash_animated`, under 1 s).
+- **More reliable sound in the browser.** The web app now unlocks audio on every kind of touch (including tap release), keeps listening so sound recovers after a call or switching apps, asks iPhone Safari to play as media so the silent switch no longer mutes it (iOS 16.4+), and shows **"Tap the screen to turn on sound"** while the browser is still holding sound back.
+- The default **maximum volume** is now 80% (was 60%) for new profiles. Saved profiles keep their own value. The −3 dBFS output limit is unchanged.
+
 ## 1.0.0 (2026-10-22): first release
 The first complete version of **AuraSOS** (originally built under the working name AuraSync).
 

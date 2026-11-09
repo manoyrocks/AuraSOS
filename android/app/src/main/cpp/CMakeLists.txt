@@ -12,8 +12,8 @@ add_library(aurasync_dsp SHARED
 
 target_include_directories(aurasync_dsp PRIVATE ${AURA_NATIVE_DIR})
 target_compile_options(aurasync_dsp PRIVATE -O2 -fvisibility=hidden)
-find_library(aaudio-lib aaudio)
+find_library(opensles-lib OpenSLES)
 find_library(log-lib log)
-target_link_libraries(aurasync_dsp ${aaudio-lib} ${log-lib})
+target_link_libraries(aurasync_dsp ${opensles-lib} ${log-lib})
 # 16 KB page-size alignment required for Android 15+ devices.
 target_link_options(aurasync_dsp PRIVATE -Wl,-z,max-page-size=16384)

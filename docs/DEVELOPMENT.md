@@ -71,7 +71,7 @@ Add a field to `SensoryProfile` (+ migration), a control in `ParentScreen`, cons
 (`SessionScreen._loadProfile`) and cover it with a model round-trip test.
 
 ### Change the app icon
-Edit the artwork in `tool/generate_icons.py`, run it, and run the tests. Do not hand-edit generated PNGs.
+Edit the artwork in `tool/generate_icons.py`, run it, and run the tests. Do not hand-edit generated PNGs. It also writes the Android round icons and the Play Store icon (`android/store/ic_launcher_512.png`). The loader heart exists in four places that should stay visually in step: `AuraLoader` (Flutter), `web/index.html` + `web/splash.css` (web splash), and `res/drawable/ic_splash_icon.xml` / `ic_splash_animated.xml` (Android 12+ splash).
 
 ### Bump the version
 `pubspec.yaml` `version:` **and** `lib/core/app_info.dart` default (a test enforces they match); add a `docs/CHANGELOG.md` entry.

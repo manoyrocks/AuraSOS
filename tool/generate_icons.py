@@ -3,8 +3,9 @@
   python3 tool/generate_icons.py
 
 Writes: web/ (PWA icons + favicon), ios/Runner/Assets.xcassets/AppIcon.appiconset (every size in
-Contents.json, opaque as the App Store requires) and android/app/src/main/res (legacy launcher
-icons, adaptive-icon foreground and the monochrome layer for themed icons).
+Contents.json, opaque as the App Store requires), android/app/src/main/res (legacy and round launcher
+icons, adaptive-icon foreground and the monochrome layer for themed icons) and the 512 px Google Play
+listing icon in android/store/.
 Pure Python + macOS `sips` for resizing; no other dependencies.
 """
 import json
@@ -27,7 +28,7 @@ def heart(x, y):
     return (x * x + y * y - 1) ** 3 - x * x * y ** 3
 
 
-def render(size, hs, rings, mode, rounded=False, ss=3):
+def render(size, hs, rings, mode, rounded=False, ss=3, circle=False):
     """Returns RGBA rows. mode: 'full' opaque design, 'fg' transparent foreground, 'mono' alpha-only."""
     rows = []
     corner = size * 0.22
@@ -35,7 +36,10 @@ def render(size, hs, rings, mode, rounded=False, ss=3):
         row = bytearray()
         for px in range(size):
             a_mask = 1.0
-            if rounded:
+            if circle:
+                d = math.hypot(px + 0.5 - size / 2, py + 0.5 - size / 2)
+                a_mask = max(0.0, min(1.0, size / 2 - d + 0.5))
+            elif rounded:
                 cx = min(px + 0.5, size - px - 0.5)
                 cy = min(py + 0.5, size - py - 0.5)
                 if cx < corner and cy < corner:
@@ -149,6 +153,16 @@ def main():
     res = p("android/app/src/main/res")
     for density, px in (("mdpi", 48), ("hdpi", 72), ("xhdpi", 96), ("xxhdpi", 144), ("xxxhdpi", 192)):
         resize(legacy, os.path.join(res, f"mipmap-{density}", "ic_launcher.png"), px)
+
+    print("Android round launcher icons (older launchers that mask icons to a circle)")
+    round_master = os.path.join(tmp, "round_512.png")
+    write_png(round_master, 512, render(512, 0.42, [(0.70, 0.026, 0.30), (0.84, 0.026, 0.14)], "full", circle=True))
+    for density, px in (("mdpi", 48), ("hdpi", 72), ("xhdpi", 96), ("xxhdpi", 144), ("xxxhdpi", 192)):
+        resize(round_master, os.path.join(res, f"mipmap-{density}", "ic_launcher_round.png"), px)
+
+    print("Google Play Store listing icon (512x512, full-bleed: Play applies its own mask)")
+    store = p("android/store/ic_launcher_512.png")
+    write_png(store, 512, render(512, 0.46, any_rings, "full"))
 
     print("Android adaptive icon layers")
     fg_rings = [(0.50, 0.02, 0.30), (0.58, 0.02, 0.14)]

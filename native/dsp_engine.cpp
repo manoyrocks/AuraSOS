@@ -19,6 +19,9 @@ constexpr double kVelocityCap = 0.85;
 constexpr int kKalimbaAttack = 2400;  // 50 ms cosine attack (>= 45 ms)
 constexpr double kSlewLimit = 0.0045;
 
+// Fixed make-up gain (+30%) ahead of the compressor and brickwall, so the -3 dBFS ceiling still holds.
+constexpr double kOutputBoost = 1.3;
+
 constexpr double kCompThresholdDb = -9.0;
 constexpr double kCompKneeDb = 8.0;
 constexpr double kCompRatio = 4.0;
@@ -616,7 +619,7 @@ void Engine::tickSample(float& outL, float& outR) {
   mixL = master_.process(0, mixL);
   mixR = master_.process(1, mixR);
 
-  const double lvlGain = fadeGain_ * capS_;
+  const double lvlGain = fadeGain_ * capS_ * kOutputBoost;
   mixL *= lvlGain;
   mixR *= lvlGain;
 

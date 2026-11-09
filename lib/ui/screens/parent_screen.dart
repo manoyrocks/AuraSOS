@@ -13,6 +13,7 @@ import '../../core/models/sensory_state.dart';
 import '../../data/clinical_report_exporter.dart';
 import '../../data/models.dart';
 import '../../data/sensory_profile_repository.dart';
+import '../widgets/aura_loader.dart';
 import '../widgets/about_section.dart';
 import '../widgets/readable_width.dart';
 import '../widgets/visual_picker.dart';
@@ -49,7 +50,7 @@ class _ParentScreenState extends State<ParentScreen> {
   final TextEditingController _name = TextEditingController();
   final TextEditingController _rules = TextEditingController();
   SensoryProfile? _profile;
-  double _volume = 0.6;
+  double _volume = 0.8;
   double _brightness = 0.8;
   double _highCut = 0;
   bool _water = true;
@@ -278,7 +279,7 @@ class _ParentScreenState extends State<ParentScreen> {
       ),
       body: ReadableWidth(
         child: _profile == null
-            ? const Center(child: CircularProgressIndicator())
+            ? const Center(child: AuraLoader())
             : ListView(
                 padding: const EdgeInsets.all(20),
                 children: <Widget>[

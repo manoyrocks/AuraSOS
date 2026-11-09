@@ -15,7 +15,7 @@ How the app is put together. For the rules it must obey, see [CLAUDE.md](../CLAU
         ┌─────────┼───────────────┐                                              │
    NativeDsp   PureDartDsp   WebAudioEngine                          ┌──────────────┴────────────┐
  (FFI → C++)   (pure Dart)   (Dart + Web Audio)                LocalDatabase (SQLite)    JsonDatabase
-   │ AAudio / AudioQueue                                       iOS · Android              (web localStorage)
+   │ OpenSL ES / AudioQueue                                      iOS · Android              (web localStorage)
 ```
 
 One Flutter codebase; one audio engine design implemented twice (C++ and Dart) that must stay behaviourally
@@ -77,7 +77,7 @@ Design points:
 Control calls (`start`, `stop`, `switchPreset`, `applyIso`, `setProfileLimits`, `triggerNote`, voice commands) are pushed
 into a 1024-entry **lock-free ring buffer**. `render()` drains it at the top of each block and then advances time in
 16-sample control steps (`kCtl`). The platform audio thread calls `render` directly; Dart never sits on the real-time path.
-`render` handles any block size, so Android's AAudio callback, iOS's AudioQueue buffers and test code all use it unchanged.
+`render` handles any block size, so Android's OpenSL ES callback, iOS's AudioQueue buffers and test code all use it unchanged.
 
 ### Familiar voice layer
 Up to four 6-second phrases (mono, 48 kHz). Phrases are copied into a **double buffer** on the calling thread and
@@ -92,6 +92,8 @@ through the same master filter, fade, compressor and limiter as everything else.
 | `NativeDsp` | iOS, Android, desktop | FFI to the C++ library; the library also opens the speaker (`aura_audio_open`). The only file importing `dart:ffi` is `native_dsp.dart` |
 | `PureDartDsp` | Tests, fallback | A faithful port of the C++ engine; deterministic and headless; the reference for most tests |
 | `WebAudioEngine` | Browser | Wraps `PureDartDsp` and renders it into a `ScriptProcessorNode`. Created after the first user gesture (browser autoplay rules) |
+
+`WebAudioEngine` also implements `SoundGate` (`lib/core/audio/sound_gate.dart`): it unlocks audio from window-level, capture-phase gesture listeners that stay installed for the life of the app (so it recovers after an interruption), asks iOS Safari for `audioSession.type = 'playback'` (so the silent switch does not mute it) and exposes `soundBlocked`, which `SessionScreen` shows as "Tap the screen to turn on sound".
 
 `DspBridge.create()` picks the backend through conditional imports (`engine_factory*.dart`). **The C++ and Dart engines must
 be changed together** (see DEVELOPMENT.md); `test/dsp_safety_test.dart`, `voice_weave_test.dart` and `native/test/dsp_test.cpp`

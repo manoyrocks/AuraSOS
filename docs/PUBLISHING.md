@@ -108,9 +108,10 @@ themed (monochrome) Android icons, iOS quick actions and Android static shortcut
 - **Wording review.** The app and pages say *calming aid, not a medical device*; avoid therapeutic or diagnostic claims in listings and
   marketing, and have the wording reviewed for your regions (COPPA, GDPR-K, health-claims rules).
 - **Name check.** Search the app stores and trademark registers for "AuraSOS".
+- **Play Store icon.** Upload `android/store/ic_launcher_512.png` (512 × 512, 32-bit PNG) as the store listing icon. It is regenerated with the other icons.
 - **Artwork.** Replace the icon by editing `tool/generate_icons.py`, rerunning it, and running the tests.
 - **Real-device testing** of everything in [TESTING.md](TESTING.md), especially Android and the sound checks, with an adult at low volume first.
-- **Clinical input.** Have an occupational therapist or BCBA review the defaults (volume cap 60%, the calm-down timings) for your audience.
+- **Clinical input.** Have an occupational therapist or BCBA review the defaults (volume cap 80%, the calm-down timings) for your audience.
 
 ## 6. Shipping updates
 1. Bump the version (`pubspec.yaml` and `lib/core/app_info.dart` together; a test enforces they match) and add a [CHANGELOG](CHANGELOG.md) entry.

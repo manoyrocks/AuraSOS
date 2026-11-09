@@ -250,6 +250,9 @@ class _Cmd {
 
 /// Faithful pure-Dart port of `native/dsp_engine.cpp` (same algorithms and constants).
 /// Deterministic and headless; commands are queued and applied at the start of [render].
+/// Fixed make-up gain (+30%) ahead of the compressor and brickwall, so the -3 dBFS ceiling still holds.
+const double _outputBoost = 1.3;
+
 class PureDartDsp implements AudioEngine, VoiceWeaveEngine {
   PureDartDsp() {
     for (var i = 0; i < 2; i++) {
@@ -935,7 +938,7 @@ class PureDartDsp implements AudioEngine, VoiceWeaveEngine {
     mL = _master.process(0, mL);
     mR = _master.process(1, mR);
 
-    final lvl = _fadeGain * _capS;
+    final lvl = _fadeGain * _capS * _outputBoost;
     mL *= lvl;
     mR *= lvl;
 

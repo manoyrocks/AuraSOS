@@ -148,6 +148,35 @@ void main() {
           isTrue);
     });
 
+    test('round launcher icons exist at every density and are circle-masked',
+        () {
+      legacy.forEach((d, px) {
+        final i = png('$res/mipmap-$d/ic_launcher_round.png');
+        expect((i.width, i.height), (px, px), reason: d);
+        expect(i.colorType, 6,
+            reason: 'round icon needs alpha for its transparent corners');
+      });
+      final x = File('$res/mipmap-anydpi-v26/ic_launcher_round.xml')
+          .readAsStringSync();
+      expect(
+          x, File('$res/mipmap-anydpi-v26/ic_launcher.xml').readAsStringSync());
+    });
+
+    test('Google Play listing icon is 512x512 and within the store size limit',
+        () {
+      final f = File('android/store/ic_launcher_512.png');
+      final i = png(f.path);
+      expect((i.width, i.height), (512, 512));
+      expect(i.colorType, 6, reason: 'Play wants a 32-bit PNG');
+      expect(f.lengthSync(), lessThan(1024 * 1024));
+    });
+
+    test('manifest points at both the square and the round icon', () {
+      final m =
+          File('android/app/src/main/AndroidManifest.xml').readAsStringSync();
+      expect(m, contains('android:roundIcon="@mipmap/ic_launcher_round"'));
+    });
+
     test('manifest uses the icon and the AuraSOS name', () {
       final m =
           File('android/app/src/main/AndroidManifest.xml').readAsStringSync();
@@ -247,6 +276,61 @@ void main() {
       expect(png('$launchDir/LaunchImage.png').width, 144);
       expect(png('$launchDir/LaunchImage@2x.png').width, 288);
       expect(png('$launchDir/LaunchImage@3x.png').width, 432);
+    });
+  });
+
+  group('loader icon', () {
+    test(
+        'Android 12+ splash shows our own animated heart on the dark background',
+        () {
+      final v31 = File('$res/values-v31/styles.xml').readAsStringSync();
+      expect(
+          v31,
+          contains(
+              'windowSplashScreenAnimatedIcon">@drawable/ic_splash_animated'));
+      expect(v31,
+          contains('windowSplashScreenBackground">@color/aura_background'));
+      final duration = int.parse(
+          RegExp(r'windowSplashScreenAnimationDuration">(\d+)<')
+              .firstMatch(v31)!
+              .group(1)!);
+      expect(duration, lessThanOrEqualTo(1000),
+          reason: 'the system caps splash animations at 1000 ms');
+    });
+
+    test('the animated splash drives parts that exist in the vector', () {
+      final anim =
+          File('$res/drawable/ic_splash_animated.xml').readAsStringSync();
+      final vec = File('$res/drawable/ic_splash_icon.xml').readAsStringSync();
+      expect(anim, contains('@drawable/ic_splash_icon'));
+      for (final t
+          in RegExp(r'<target android:name="(\w+)"').allMatches(anim)) {
+        expect(vec, contains('android:name="${t.group(1)}"'),
+            reason: 'missing target ${t.group(1)}');
+      }
+    });
+
+    test(
+        'the splash artwork stays inside the 192dp circle Android 12 shows (288dp canvas)',
+        () {
+      final vec = File('$res/drawable/ic_splash_icon.xml').readAsStringSync();
+      expect(vec, contains('android:viewportWidth="288"'));
+      // Rings: "M<x>,<y>a<r>,<r> ..." centred on x=144; every ring must fit within radius 96.
+      for (final m
+          in RegExp(r'pathData="M(\d+),(\d+)a(\d+),').allMatches(vec)) {
+        final startX = int.parse(m.group(1)!), r = int.parse(m.group(3)!);
+        expect((startX + r - 144).abs(), lessThanOrEqualTo(1),
+            reason: 'ring not centred');
+        expect(r, lessThanOrEqualTo(92));
+      }
+    });
+
+    test('the web splash is the heart, inline and external-free', () {
+      final html = File('web/index.html').readAsStringSync();
+      expect(html, contains('id="splashHeart"'));
+      expect(html, isNot(contains('<div></div>')));
+      expect(
+          File('web/splash.css').readAsStringSync(), contains('#splash svg'));
     });
   });
 

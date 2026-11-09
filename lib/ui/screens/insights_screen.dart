@@ -5,6 +5,7 @@ import '../../data/clinical_report_exporter.dart';
 import '../../data/models.dart';
 import '../../data/session_insights.dart';
 import '../../data/sensory_profile_repository.dart';
+import '../widgets/aura_loader.dart';
 import '../widgets/readable_width.dart';
 
 /// Caregiver-only overview of what has helped: efficacy per preset, when sessions
@@ -64,7 +65,7 @@ class _InsightsScreenState extends State<InsightsScreen> {
       appBar: AppBar(title: const Text('What helps')),
       body: ReadableWidth(
         child: logs == null
-            ? const Center(child: CircularProgressIndicator())
+            ? const Center(child: AuraLoader())
             : logs.isEmpty
                 ? const Center(
                     child: Padding(

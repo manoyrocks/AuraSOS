@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../core/audio/audio_engine.dart';
+import '../../core/audio/sound_gate.dart';
 import '../../core/audio/voice_weave.dart';
 import '../../core/engine/iso_principle_controller.dart';
 import '../../core/models/sensory_state.dart';
@@ -309,6 +310,30 @@ class _SessionScreenState extends State<SessionScreen> {
               ),
             ),
           ),
+          if (widget.audio is SoundGate)
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 66),
+                  child: Center(
+                    child: IgnorePointer(
+                      child: ValueListenableBuilder<bool>(
+                        valueListenable:
+                            (widget.audio as SoundGate).soundBlocked,
+                        builder:
+                            (BuildContext context, bool blocked, Widget? _) =>
+                                blocked
+                                    ? const _SoundHint()
+                                    : const SizedBox.shrink(),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
           if (showTimer)
             Positioned(
               left: 0,
@@ -469,6 +494,39 @@ class _ModeChip extends StatelessWidget {
             fontWeight: FontWeight.w600,
             letterSpacing: 0.4,
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Shown only while the browser is still holding sound back: the next touch lets it play.
+class _SoundHint extends StatelessWidget {
+  const _SoundHint();
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: const Color(0x66000000),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0x33FFFFFF)),
+      ),
+      child: const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Icon(Icons.volume_off_rounded, size: 20, color: Color(0xCCFFFFFF)),
+            SizedBox(width: 10),
+            Text(
+              'Tap the screen to turn on sound',
+              style: TextStyle(
+                  color: Color(0xCCFFFFFF),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600),
+            ),
+          ],
         ),
       ),
     );

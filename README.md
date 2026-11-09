@@ -58,7 +58,7 @@ Android builds need the Android SDK + NDK (`flutter build apk --debug`). See
 ## Platforms
 | | iOS | Android | Web (PWA) |
 |---|---|---|---|
-| Audio engine | Native C++ (AudioQueue) | Native C++ (AAudio) | Same engine in Dart, Web Audio |
+| Audio engine | Native C++ (AudioQueue) | Native C++ (OpenSL ES) | Same engine in Dart, Web Audio |
 | Data | SQLite | SQLite | `localStorage` (JSON) |
 | Offline | Yes | Yes | Yes, once installed / cached (needs HTTPS or localhost) |
 | Voice recording | Yes | Yes | No (no microphone capture) |
